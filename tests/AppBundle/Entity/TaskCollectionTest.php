@@ -12,28 +12,28 @@ abstract class TaskCollectionTest extends TestCase
 {
     protected $taskCollection;
 
-    private function assertAddTask(Task $task)
+    private function assertAddTask($count)
     {
-        $this->assertCount(1, $this->taskCollection->getItems());
+        $this->assertCount($count, $this->taskCollection->getItems());
         $this->assertInstanceOf(TaskCollectionItem::class, $this->taskCollection->getItems()->get(0));
-        $this->assertSame($task, $this->taskCollection->getItems()->get(0)->getTask());
         $this->assertSame($this->taskCollection, $this->taskCollection->getItems()->get(0)->getParent());
     }
 
-    public function testAddTaskWithoutPosition()
+    public function testAddTasksWithoutPosition()
     {
         $task = new Task();
         $task2 = new Task();
 
         $this->taskCollection->addTask($task);
 
-        $this->assertAddTask($task);
-        $this->assertEquals(0, $this->taskCollection->getItems()->get(0)->getPosition());
+        $this->assertAddTask(1);
 
-        $this->taskCollection->addTask($task);
+        $this->assertEquals($task, $this->taskCollection->findAt(0)->getTask());
 
-        $this->assertAddTask($task2);
-        $this->assertEquals(1, $this->taskCollection->getItems()->get(0)->getPosition());
+        $this->taskCollection->addTask($task2);
+
+        $this->assertAddTask(2);
+        $this->assertEquals($task2, $this->taskCollection->findAt(1)->getTask());
     }
 
     public function testAddSameTaskTwiceWithoutPosition()
@@ -42,13 +42,14 @@ abstract class TaskCollectionTest extends TestCase
 
         $this->taskCollection->addTask($task);
 
-        $this->assertAddTask($task);
+        $this->assertAddTask(1);
         $this->assertEquals(0, $this->taskCollection->getItems()->get(0)->getPosition());
 
         $this->taskCollection->addTask($task);
 
-        $this->assertAddTask($task);
+        $this->assertAddTask(1);
         $this->assertEquals(0, $this->taskCollection->getItems()->get(0)->getPosition());
+        $this->assertEquals($task, $this->taskCollection->findAt(0)->getTask());
     }
 
     public function testAddTaskWithPosition()
@@ -57,8 +58,8 @@ abstract class TaskCollectionTest extends TestCase
 
         $this->taskCollection->addTask($task, 4);
 
-        $this->assertAddTask($task);
-        $this->assertEquals(4, $this->taskCollection->getItems()->get(0)->getPosition());
+        $this->assertAddTask(1);
+        $this->assertEquals($task, $this->taskCollection->findAt(4)->getTask());
     }
 
     public function testAddTaskUpdatesPosition()
@@ -94,11 +95,8 @@ abstract class TaskCollectionTest extends TestCase
     public function testUpdateTasksInsertTask()
     {
         $task = new Task();
-        $task->setId(1);
         $task1 = new Task();
-        $task1->setId(2);
         $newTask = new Task();
-        $newTask->setId(3);
 
         $this->taskCollection->addTask($task, 0);
         $this->taskCollection->addTask($task1, 1);
@@ -109,19 +107,16 @@ abstract class TaskCollectionTest extends TestCase
         $tasksToAssign[$task1] = 2;
         $this->taskCollection->updateTasks($tasksToAssign);
 
-        $this->assertEquals($this->taskCollection->findAt(0)->getTask()->getId(), 1);
-        $this->assertEquals($this->taskCollection->findAt(1)->getTask()->getId(), 3);
-        $this->assertEquals($this->taskCollection->findAt(2)->getTask()->getId(), 2);
+        $this->assertEquals($this->taskCollection->findAt(0)->getTask(), $task);
+        $this->assertEquals($this->taskCollection->findAt(1)->getTask(), $newTask);
+        $this->assertEquals($this->taskCollection->findAt(2)->getTask(), $task);
     }
 
     public function testUpdateTasksPushTask()
     {
         $task = new Task();
-        $task->setId(1);
         $task1 = new Task();
-        $task1->setId(2);
         $newTask = new Task();
-        $newTask->setId(3);
 
         $this->taskCollection->addTask($task, 0);
         $this->taskCollection->addTask($task1, 1);
@@ -132,9 +127,9 @@ abstract class TaskCollectionTest extends TestCase
         $tasksToAssign[$newTask] = 2;
         $this->taskCollection->updateTasks($tasksToAssign);
 
-        $this->assertEquals($this->taskCollection->findAt(0)->getTask()->getId(), 1);
-        $this->assertEquals($this->taskCollection->findAt(1)->getTask()->getId(), 2);
-        $this->assertEquals($this->taskCollection->findAt(2)->getTask()->getId(), 3);
+        $this->assertEquals($this->taskCollection->findAt(0)->getTask(), $task);
+        $this->assertEquals($this->taskCollection->findAt(1)->getTask(), $task1);
+        $this->assertEquals($this->taskCollection->findAt(2)->getTask(), $newTask);
     }
 
     public function testUpdateTasksRemoveTask()
