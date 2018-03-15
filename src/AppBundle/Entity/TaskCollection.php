@@ -109,4 +109,14 @@ abstract class TaskCollection
 
         return false;
     }
+
+    public function findAt($position) {
+        /*
+         * Find item at position or return null
+         */
+
+        return $this->getItems()->filter(function (TaskCollectionItem $item) use ($position) {
+            return $item->getPosition() === $position;
+        })->first();
+    }
 }

@@ -299,30 +299,13 @@ trait AdminDashboardTrait
         // Tasks are sent as JSON payload
         $data = json_decode($request->getContent(), true);
 
-        $assignedTasks = new \SplObjectStorage();
-        foreach ($taskList->getItems() as $taskListItem) {
-            $assignedTasks[$taskListItem->getTask()] = $taskListItem->getPosition();
-        }
-
         $tasksToAssign = new \SplObjectStorage();
         foreach ($data as $item) {
             $task = $this->getResourceFromIri($item['task']);
             $tasksToAssign[$task] = $item['position'];
         }
 
-        $tasksToUnassign = [];
-        foreach ($assignedTasks as $task) {
-            if (!$tasksToAssign->contains($task)) {
-                $tasksToUnassign[] = $task;
-            }
-        }
-
-        foreach ($tasksToUnassign as $task) {
-            $taskList->removeTask($task);
-        }
-        foreach ($tasksToAssign as $task) {
-            $taskList->addTask($task, $tasksToAssign[$task]);
-        }
+        $taskList->updateTasks($tasksToAssign);
 
         $this->getDoctrine()
             ->getManagerForClass(TaskList::class)

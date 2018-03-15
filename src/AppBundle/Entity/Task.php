@@ -151,6 +151,13 @@ class Task implements TaggableInterface
         return $this->id;
     }
 
+    public function setId($id)
+    {
+        $this->id = $id;
+
+        return $this;
+    }
+
     public function getDelivery()
     {
         return $this->delivery;

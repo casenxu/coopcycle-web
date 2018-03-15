@@ -81,4 +81,30 @@ class TaskList extends TaskCollection implements TaskCollectionInterface
 
         return parent::removeTask($task);
     }
+
+    public function updateTasks($tasksToAssign)
+    {
+
+        $assignedTasks = new \SplObjectStorage();
+        foreach ($this->getItems() as $taskListItem) {
+            $assignedTasks[$taskListItem->getTask()] = $taskListItem->getPosition();
+        }
+
+        $tasksToUnassign = [];
+        foreach ($assignedTasks as $task) {
+            if (!$tasksToAssign->contains($task)) {
+                $tasksToUnassign[] = $task;
+            }
+        }
+
+        foreach ($tasksToAssign as $task) {
+            $this->addTask($task, $tasksToAssign[$task]);
+        }
+
+        foreach ($tasksToUnassign as $task) {
+            $this->removeTask($task);
+        }
+
+        return $this;
+    }
 }
