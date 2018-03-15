@@ -22,13 +22,13 @@
 
 {{ form_start(form) }}
 
-  {% if delivery.status == 'TO_BE_CONFIRMED' %}
+  {% if delivery_order is defined and delivery_order is not empty %}
   <div class="alert alert-warning">
     <i class="fa fa-exclamation-triangle"></i> {{ 'form.delivery.to_be_confirmed.alert'|trans }}
     <span class="pull-right">
-    {% if form.confirm is defined %}
-    {{ form_widget(form.confirm, { attr: { class: 'btn btn-xs btn-success' } }) }}
-    {% endif %}
+      <a class="btn btn-xs btn-success" href="{{ path('admin_delivery_order', { id: delivery.id }) }}">
+        {{ 'form.delivery.to_be_confirmed.view_order'|trans }}
+      </a>
     </span>
   </div>
   {% endif %}
